@@ -4,7 +4,9 @@
   "description": "Server running on a Raspberry Pi to control an RGBW LED strip.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "rimraf templates",
+    "build": "npm run clean && webpack",
+    "watch": "npm run clean && webpack --watch"
   },
   "repository": {
     "type": "git",
@@ -25,14 +27,12 @@
     "css-loader": "^0.28.2",
     "extract-text-webpack-plugin": "^2.1.0",
     "html-webpack-plugin": "^2.28.0",
-    "node-sass": "^4.5.3",
+    "manifest-revision-webpack-plugin": "^0.4.0",
     "react": "^15.5.4",
     "react-dom": "^15.5.4",
-    "react-redux": "^5.0.5",
-    "redux": "^3.6.0",
+    "rimraf": "^2.6.1",
     "sass-loader": "^6.0.5",
     "style-loader": "^0.18.1",
-    "webpack": "^2.1.0-beta.22",
-    "webpack-bundle-tracker": "^0.2.0"
+    "webpack": "^2.1.0-beta.22"
   }
 }
