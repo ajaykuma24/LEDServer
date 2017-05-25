@@ -1,5 +1,6 @@
 from flask import Flask, render_template, send_from_directory, request
 from os import environ, path
+import json
 
 here = path.abspath(path.dirname(__file__))
 
@@ -16,7 +17,11 @@ def send_asset(filename):
 
 @app.route('/colors', methods=['POST'])
 def setcolor():
-	print(request)
+	d = json.loads(request.data)
+	R = d["R"]
+	G = d["G"]
+	B = d["B"]
+	print('R: ' + str(R) + ' G: ' + str(G) +' B: ' + str(B) )
 	return ('set!')
 
 if __name__ == '__main__':

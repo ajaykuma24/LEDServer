@@ -18,7 +18,21 @@ class ColorForm extends React.Component {
   }
 
   handleSubmit(event) {
-    alert('A name was submitted: R: ' + this.state.R.toString() + ' G: ' + this.state.G.toString() +' B: ' + this.state.B.toString() );
+    fetch("/colors", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json, text/plain, */*',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(this.state)
+            })
+            .then(function(res) {
+                return res.text();
+            })
+            .then(function(data) {
+                console.log('sent')
+                console.log(data)
+            })
     event.preventDefault();
   }
 
