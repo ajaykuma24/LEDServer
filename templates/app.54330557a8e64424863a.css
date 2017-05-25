@@ -9,3 +9,10 @@ title {
   margin: auto;
   text-align: center;
   font-size: 28px; }
+
+h1 {
+  padding-top: 18px;
+  display: block;
+  margin: auto;
+  text-align: center;
+  font-size: 20px; }
