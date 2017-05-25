@@ -31,12 +31,12 @@ def send_asset(filename):
 @app.route('/colors', methods=['POST'])
 def setcolor():
 	d = json.loads(request.data)
-	R = d["R"]
-	G = d["G"]
-	B = d["B"]
-	gpio.set_PWM_dutycycle(red, R)
-	gpio.set_PWM_dutycycle(green, G) 
-	gpio.set_PWM_dutycycle(blue, B) 
+	R = d["r"]
+	G = d["g"]
+	B = d["b"]
+	#gpio.set_PWM_dutycycle(red, R)
+	#gpio.set_PWM_dutycycle(green, G) 
+	#gpio.set_PWM_dutycycle(blue, B) 
 	print('R: ' + str(R) + ' G: ' + str(G) +' B: ' + str(B) )
 	return ('set!')
 

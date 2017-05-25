@@ -1,20 +1,33 @@
 import React from 'react';
+import { SketchPicker } from 'react-color';
 
 class ColorForm extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {R: 0, G: 0, B: 0, value: ''};
+    this.state = {colorrgba: {
+         r: 0,
+         g: 0,
+         b: 0,
+         a: 1
+       }
+    }
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleChange(event) {
-    var R = parseInt(event.target.value.slice(1, 3), 16)
-    var G = parseInt(event.target.value.slice(3, 5), 16) 
-    var B = parseInt(event.target.value.slice(5, 7), 16)
-    document.getElementById('submit').style.backgroundColor = event.target.value;
-    this.setState({R: R, G: G, B: B, value: event.target.value});
+  handleChange(color, event) {
+    var R = color.rgb.r
+    var G = color.rgb.g
+    var B = color.rgb.b
+    document.getElementById('submit').style.backgroundColor = color.hex
+    if(color.hsl.l > 0.4) {
+      document.getElementById('submitText').style.color = '#000000'
+    }
+    else {
+      document.getElementById('submitText').style.color = '#FFFFFF'
+    }
+    this.setState({colorrgba: color.rgb});
   }
 
   handleSubmit(event) {
@@ -24,7 +37,7 @@ class ColorForm extends React.Component {
                     'Accept': 'application/json, text/plain, */*',
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(this.state)
+                body: JSON.stringify(this.state.colorrgba)
             })
             .then(function(res) {
                 return res.text();
@@ -38,14 +51,13 @@ class ColorForm extends React.Component {
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
-        <label>
-          Select a Color:</label>
-          <input type="color" value={this.state.value} onChange={this.handleChange} />
-        <div id="submit" onClick={this.handleSubmit}>
-          <p>Submit</p>
-        </div>
-      </form>
+      <div id="form">
+        <h1>Select a Color:</h1>
+          <SketchPicker color={ this.state.colorrgba } onChange={ this.handleChange} />
+          <div id="submit" onClick={this.handleSubmit}>
+            <p id="submitText">Submit</p>
+          </div>
+      </div>
     );
   }
 }
