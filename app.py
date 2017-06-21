@@ -1,8 +1,8 @@
 from flask import Flask, render_template, send_from_directory, request
 from os import environ, path
-import json
 import pigpio
 import time
+import threading
 
 gpio = pigpio.pi()
 
@@ -25,30 +25,42 @@ gpio.set_PWM_dutycycle(green, 0)
 gpio.set_PWM_dutycycle(blue, 0)
 gpio.set_PWM_dutycycle(white, 0) 
 
+testvals = [(150, 0  , 0  , 0, 500, 5000),
+			(150, 75 , 0  , 0, 500, 5000),
+			(75 , 75 , 0  , 0, 500, 5000),
+			(75 , 150, 0  , 0, 500, 5000),
+			(0  , 150, 0  , 0, 500, 5000),
+			(0  , 150, 75 , 0, 500, 5000),
+			(0  , 75 , 75 , 0, 500, 5000),
+			(0  , 75 , 150, 0, 500, 5000),
+			(0  , 0  , 150, 0, 500, 5000),
+			(75 , 0  , 150, 0, 500, 5000),
+			(75 , 0  , 75 , 0, 500, 5000),
+			(150, 0  , 75 , 0, 500, 5000),
+			(0  , 0  , 0 , 0, 500, 5000)]
+
+class FuncThread(threading.Thread):
+    def __init__(self, target, *args):
+        self._target = target
+        self._args = args
+        threading.Thread.__init__(self)
+ 
+    def run(self):
+        self._target(*self._args)
+
 here = path.abspath(path.dirname(__file__))
 
 app = Flask(__name__, static_folder='templates')
 
+def clip(x, lo, hi):
+    return lo if x <= lo else hi if x >= hi else x
+
 def setcols(R=0, G=0, B=0, W=0):
-	if(R>255.0):
-		R=255.0
-	if(R<0.0):
-		R=0.0
+	R = clip(R, 0.0, 255.0)
+	G = clip(G, 0.0, 255.0)
+	B = clip(B, 0.0, 255.0)
+	W = clip(W, 0.0, 255.0)
 
-	if(G>255.0):
-		G=255.0
-	if(G<0.0):
-		G=0.0
-
-	if(B>255.0):
-		B=255.0
-	if(B<0.0):
-		B=0.0
-
-	if(W>255.0):
-		W=255.0
-	if(W<0.0):
-		W=0.0
 	currcolor['r']=R
 	currcolor['g']=G
 	currcolor['b']=B
@@ -57,32 +69,20 @@ def setcols(R=0, G=0, B=0, W=0):
 	G = round(G/gadj)
 	B = round(B/badj)
 	W = round(W/wadj)
-	if(R>255):
-		R=255
-	if(R<0):
-		R=0
 
-	if(G>255):
-		G=255
-	if(G<0):
-		G=0
+	R = clip(R, 0.0, 255.0)
+	G = clip(G, 0.0, 255.0)
+	B = clip(B, 0.0, 255.0)
+	W = clip(W, 0.0, 255.0)
 
-	if(B>255):
-		B=255
-	if(B<0):
-		B=0
-
-	if(W>255):
-		W=255
-	if(W<0):
-		W=0
 	print(str(R)+' '+str(G)+' '+str(B)+' '+str(W)+' ')
+
 	gpio.set_PWM_dutycycle(red, R)
 	gpio.set_PWM_dutycycle(green, G) 
 	gpio.set_PWM_dutycycle(blue, B) 
 	gpio.set_PWM_dutycycle(white, W) 
 
-def change(R=0, G=0, B=0, W=0, changet = 2000):
+def change(R=0, G=0, B=0, W=0, wait=1000, changet = 2000):
 	diff = changet//delta
 	dr = (R-currcolor['r'])/diff
 	dg = (G-currcolor['g'])/diff
@@ -92,9 +92,14 @@ def change(R=0, G=0, B=0, W=0, changet = 2000):
 		setcols(currcolor['r']+dr, currcolor['g']+dg, currcolor['b']+db, currcolor['w']+dw)
 		sleep(delta)
 	setcols(R, G, B, W)
+	sleep(wait)
 
 def sleep(s=1000):
 	time.sleep(s/1000.0)
+
+def control(data):
+	for val in data:
+		change(*val)
 
 @app.route('/')
 def hello_world():
@@ -107,11 +112,12 @@ def send_asset(filename):
 
 @app.route('/colors', methods=['POST'])
 def setcolor():
-	d=request.json
+	d=request.get_json()
 	R = d["r"]
 	G = d["g"]
 	B = d["b"]
-	change(R, G, B)
+	#change(R, G, B)
+	control(testvals)
 	print('R: ' + str(R) + ' G: ' + str(G) +' B: ' + str(B) )
 	return ('set!')
 
