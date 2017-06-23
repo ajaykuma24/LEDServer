@@ -5,13 +5,17 @@ class ColorInfo extends React.Component {
 		super(props);
 	}
 	render() {
+		const color = 'rgb(' + this.props.r.toString() + ', ' + this.props.g.toString() + ', ' + this.props.b.toString() + ')';
+		const style = {
+			backgroundColor: color
+		}
 		return (
-			<div class="colorInfo">
-				<div class="colorBox">
+			<div className="colorInfo">
+				<div className="colorBox" style={style}>
 				</div>
-				<div class="transitionTime">
-    			</div>
-    			<div class="waitTime">
+				<div className="nums">
+				<p className="infos">{this.props.t}</p>
+    			<p className="infos">{this.props.w}</p>
     			</div>
 
 			</div>

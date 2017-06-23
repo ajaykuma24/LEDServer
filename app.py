@@ -111,7 +111,7 @@ def control(data):
 	for val in data:
 		if(stopt.is_set()):
 			return
-		change(*val)
+		change(int(val['r']), int(val['g']), int(val['b']), 0, int(val['w']), int(val['t']))
 
 @app.route('/')
 def hello_world():
@@ -127,22 +127,15 @@ def setcolor():
 	global runth
 	print('request')
 	d=request.get_json()
-	R = d["r"]
-	G = d["g"]
-	B = d["b"]
-	change(R, G, B, 0, 500, 3000)
-	# if(not(runth is None)):	
-	# 	stopt.set()
-	# 	print('set')
-	# 	runth.join()
-	# 	print('joined')
-	# 	stopt.clear()
-	# print('first')
-
-	# print('test1')
-	# runth = FuncThread(control, *testvals)
-	# runth.start()
-	print('R: ' + str(R) + ' G: ' + str(G) +' B: ' + str(B) )
+	#change(d['r'], d['g'], d['b'], 0, 500, 3000)
+	if(not(runth is None)):	
+		stopt.set()
+		print('set')
+		runth.join()
+		print('joined')
+		stopt.clear()
+	runth = FuncThread(control, *d)
+	runth.start()
 	return ('set!')
 
 @app.route('/stop')
@@ -156,10 +149,6 @@ def stopgpio():
 	stopt.set()
 	runth.join()
 	return 'stopped'
-
-@app.route('/test')
-def testthread():
-	return 'test'
 
 if __name__ == '__main__':
   app.run(host='0.0.0.0', debug=True, threaded=True)

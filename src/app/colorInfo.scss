@@ -1,15 +1,27 @@
 .colorInfo {
-	
+	float: left;
+	width: 20%;
+	height: 50px;
 }
 
 .colorBox {
-	
+	float: left;
+	width: 30%;
+	height: 70%;
+	border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px, rgba(0, 0, 0, 0.15) 0px 8px 16px;
+}
+.nums {
+	float: right;
+	width: 70%;
+
 }
 
-.transitionTime {
-	
-}
-
-.waitTime {
-	
+.infos {
+	padding-left: 10px;
+	margin: 0 auto;
+	display: block;
+    text-align: left;
+    font-size: 12px;
+    color: rgb(255, 255, 255);
 }
