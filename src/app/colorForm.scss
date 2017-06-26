@@ -1,72 +1,91 @@
 h1 {
-	display: block;
     text-align: center;
     padding-top: 10px;
     padding-bottom: 15px;
     font-size: 18px;
     font-weight: 300;
 }
-#colstosend {
-	padding-top: 15px;
-	width: 50%;
-	clear: both;
+
+#inputs {
+    padding-top: 15px;
+    text-align: center;
+    width: 35%;
+    overflow: auto;
 }
 
+p {
+    margin: 0 auto;
+}
+
+#left {
+    float: left;
+    width: 50%;
+}
+
+#right {
+    float: right;
+    width: 50%;
+}
 
 .input {
-	display: inline-block;
-	width: 90%;
-	height: 30px;
-	border-radius: 4px;
-	margin-top: 15px;
+    width: 90%;
+    height: 30px;
+    border-radius: 4px;
+    margin-top: 15px;
     box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px, rgba(0, 0, 0, 0.15) 0px 8px 16px;
     text-align: center;
     font-size: 16px;
     font-weight: bold;
-    font-family: 'Open Sans',Helvetica Neue, Arial,sans-serif;
+    font-family: 'Open Sans', Helvetica Neue, Arial, sans-serif;
     background-color: #DFDFDF;
+    border: 1px solid #DFDFDF;
 }
 
-
-
-#inputs {
-	padding-top: 15px;
-	text-align: center;
-	width: 35%;
-}
-
-p {
-	margin: 0 auto;
-}
-
-#left {
-	float: left;
-}
-
-#right {
-	float: right;
+.input.error {
+	border: 1px solid red;
+	border-radius: 4px;
 }
 
 .button {
-	width: 90%;
-	margin-top: 40px;
-	padding: 5px;
-	margin-left: auto;
-	margin-right: auto;
-	margin-bottom: 15px;
+    width: 90%;
+    margin-top: 40px;
+    padding: 5px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 15px;
     background-color: rgb(0, 0, 0);
     opacity: 0.85;
     border-radius: 4px;
     box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px, rgba(0, 0, 0, 0.15) 0px 8px 16px;
+    transition-property: opacity;
+  	transition-duration: 0.25s;
+  	transition-timing-function: linear;
 }
+
 .button:hover {
-	opacity: 0.65;
-	cursor: pointer;
+    opacity: 0.65;
+    cursor: pointer;
 }
+
 .buttonText {
-	margin: auto;
-	display: block;
     text-align: center;
     font-size: 18px;
     color: rgb(255, 255, 255);
+}
+
+#err {
+    width: 35%;
+    text-align: center;
+    font-size: 18px;
+    color: rgb(255, 255, 255);
+    background-color: rgb(255, 20, 20);
+    opacity: 0.7;
+    border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 0px 0px 1px, rgba(0, 0, 0, 0.15) 0px 8px 16px;
+}
+
+#colstosend {
+    padding-top: 15px;
+    width: 50%;
+    clear: both;
 }
