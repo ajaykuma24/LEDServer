@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "clean": "rimraf templates",
-    "build": "npm run clean && webpack",
-    "watch": "npm run clean && webpack --watch"
+    "build": "rimraf templates && webpack",
+    "watch": "rimraf templates && webpack --watch"
   },
   "repository": {
     "type": "git",

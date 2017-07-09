@@ -1,20 +1,24 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans);
+body * {
+    margin: 0 auto;
+    text-align: center;
+    
+}
 html {
     height: 100%;
     width: 100%;
 }
 
 body {
-    height: 100%;
-    padding: 0;
     font-family: 'Open Sans',Helvetica Neue, Arial,sans-serif;
     color: #DFDFDF;
-    margin: auto;
-    display: block;
     background: linear-gradient(107deg, #007859, #9c7cff);
     background-size: 400% 400%;
+    height: 100%;
+    width: 100%;
 }
 
-div {
-    margin: auto;
+#react-root {
+    height: 100%;
+    width: 100%;
 }

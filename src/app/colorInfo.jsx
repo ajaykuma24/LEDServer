@@ -7,12 +7,12 @@ class ColorInfo extends React.Component {
 		this.contextMenu = this.contextMenu.bind(this);
 	}
 	contextMenu(event) {
+		event.preventDefault();
 		this.props.edit(this.props.index);
-    	event.preventDefault();
 	}
 	handleClick(event) {
-		this.props.clickHandle(this.props.index);
 		event.preventDefault();
+		this.props.clickHandle(this.props.index);
 	}
 	render() {
 		const color = 'rgb(' + this.props.r.toString() + ', ' + this.props.g.toString() + ', ' + this.props.b.toString() + ')';

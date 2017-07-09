@@ -7,8 +7,8 @@ from Queue import Queue
 
 gpio = pigpio.pi()
 
-radj = 1.2
-gadj = 3.2
+radj = 1.1
+gadj = 3.5
 badj = 3.5
 wadj = 2.0
 
@@ -39,7 +39,7 @@ def setcols(cols, R=0, G=0, B=0, W=0):
 	G = clip(G, 0.0, 255.0)
 	B = clip(B, 0.0, 255.0)
 	W = clip(W, 0.0, 255.0)
-	#print(str(R)+' '+str(G)+' '+str(B)+' '+str(W)+' ')
+	# print(str(R)+' '+str(G)+' '+str(B)+' '+str(W)+' ')
 	if(R==cols.r and G==cols.g and B==cols.b and W==cols.w):
 		return
 
@@ -78,6 +78,14 @@ def change(cols, R=0, G=0, B=0, W=0, wait=1000, changetime = 2000):
 		return
 	sleep(wait)
 
+def iterate(cols, data):
+	for val in data:
+			if(stopth.is_set()):
+				print('return')
+				return
+			change(cols, int(val['r']), int(val['g']), int(val['b']), 0, int(val['w']), int(val['t']))
+
+
 def control(q):
 	class Struct(object):pass
 	cols=Struct()
@@ -95,12 +103,21 @@ def control(q):
 		if(stopth.is_set()):
 			print('clear')
 			stopth.clear()
-
-		for val in data:
-			if(stopth.is_set()):
-				print('break')
-				break
-			change(cols, int(val['r']), int(val['g']), int(val['b']), 0, int(val['w']), int(val['t']))
+		if(data['inf']):
+			while True:
+				if(stopth.is_set()):
+					print('break')
+					break
+				iterate(cols, data['colors'])
+				sleep(1)
+		else:
+			for x in range(int(data['reps'])):
+				if(stopth.is_set()):
+					print('break')
+					break
+				iterate(cols, data['colors'])
+				sleep(1)
+		sleep(1)
 
 @app.route('/')
 def index():
@@ -121,14 +138,16 @@ def setcolor():
 
 @app.route('/stop')
 def stop():
+	stopth.set()
+	queue.put(None)
+	queue.put(None)
+	queue.put(None)
+	runth.join()
 	gpio.set_PWM_dutycycle(red, 0)
 	gpio.set_PWM_dutycycle(green, 0) 
 	gpio.set_PWM_dutycycle(blue, 0)
 	gpio.set_PWM_dutycycle(white, 0) 
 	gpio.stop()
-	stopth.set()
-	queue.put(None)
-	runth.join()
 	print('joined')
 	return 'stopped'
 
