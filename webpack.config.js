@@ -2,8 +2,8 @@ var Path = require("path")
 var webpack = require('webpack')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin');
-var cssOutputPath =  'app.[hash].css'
-var jsOutputPath = 'app.[hash].js'
+var cssOutputPath =  './static/app.[hash].css'
+var jsOutputPath = './static/app.[hash].js'
 var ExtractSASS = new ExtractTextPlugin(cssOutputPath);
 
 
@@ -22,8 +22,13 @@ module.exports = {
         plugins: [
             new HtmlWebpackPlugin({
             template: Path.join(__dirname, './src/index.html'),
+            hash: true
             }),
-            ExtractSASS
+            ExtractSASS,
+            new webpack.DllReferencePlugin({
+            context: Path.join(__dirname),
+            manifest: require("./dll/vendor-manifest.json")
+        }),
         ],
 
         module: {
@@ -31,8 +36,8 @@ module.exports = {
                 test: /\.jsx?$/,
                 loader: 'babel-loader',
                 query: {
-                    presets: ['es2015', 'react'],
-                    cacheDirectory: true
+                    cacheDirectory: true,
+                    presets: ['es2015', 'react']
                 },
                 include: Path.join(__dirname, './src/app/'),
                 exclude: Path.join(__dirname, './node_modules/')
@@ -48,4 +53,5 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.jsx']
     },
+    cache: true
 }

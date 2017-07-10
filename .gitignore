@@ -1,3 +1,6 @@
 node_modules/
 templates/
 templates/*
+stats.json
+dll/vendor-manifest.json
+

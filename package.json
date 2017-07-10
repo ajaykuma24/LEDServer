@@ -4,9 +4,10 @@
   "description": "Server running on a Raspberry Pi to control an RGBW LED strip.",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf templates",
-    "build": "rimraf templates && webpack",
-    "watch": "rimraf templates && webpack --watch"
+    "lib": "rimraf templates/static/ && webpack --config webpack.dll.js",
+    "clean": "rimraf templates/static/",
+    "build": "rimraf templates/static/ && webpack",
+    "watch": "rimraf templates/static/ && webpack --watch"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,7 @@
     "react": "^15.5.4",
     "react-color": "^2.11.7",
     "react-dom": "^15.5.4",
+    "react-router": "^4.1.1",
     "rimraf": "^2.6.1",
     "sass-loader": "^6.0.5",
     "style-loader": "^0.18.1",
