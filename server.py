@@ -136,6 +136,12 @@ def setcolor():
 	queue.put(d)
 	return ('set!')
 
+def shutdown_server():
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+
 @app.route('/stop')
 def stop():
 	stopth.set()
@@ -149,6 +155,7 @@ def stop():
 	gpio.set_PWM_dutycycle(white, 0) 
 	gpio.stop()
 	print('joined')
+	shutdown_server()
 	return 'stopped'
 
 queue = Queue()

@@ -3,4 +3,6 @@ templates/
 templates/*
 stats.json
 dll/vendor-manifest.json
-
+server.pyc
+logs/
+logs/*

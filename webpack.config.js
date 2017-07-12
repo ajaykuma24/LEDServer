@@ -20,9 +20,11 @@ module.exports = {
         },
 
         plugins: [
+        	new webpack.ProvidePlugin({
+    		"React": "react",
+  			}),
             new HtmlWebpackPlugin({
             template: Path.join(__dirname, './src/index.html'),
-            hash: true
             }),
             ExtractSASS,
             new webpack.DllReferencePlugin({

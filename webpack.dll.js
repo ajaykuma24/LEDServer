@@ -17,7 +17,7 @@ module.exports = {
             context: path.resolve(__dirname )
         }),
         new webpack.optimize.OccurrenceOrderPlugin(),
-        new webpack.optimize.UglifyJsPlugin()
+        // new webpack.optimize.UglifyJsPlugin()
     ],
     resolve: {
         modules: [path.resolve(__dirname), "node_modules"]
