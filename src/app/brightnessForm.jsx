@@ -1,27 +1,22 @@
-import ColorInfo from './colorInfo';
-import { SketchPicker } from 'react-color';
 import NumInputs from './numInputs';
+import ColorInfo from './colorInfo';
 
-class ColorForm extends React.Component {
+class BrightnessForm extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			color: {
-				r: 0,
-				g: 0,
-				b: 0
-			},
+			value: {val: "", err: false},
 			transition: {val: "", err: false},
 			wait: {val: "", err: false},
 			rep: {val: "1", err: false},
-			colors: [],
+			values: [],
 			inf: false,
 			error1: "",
 			error2: "",
 			edit: false
 		}
 
-		this.handleColor = this.handleColor.bind(this);
+		this.handleVal = this.handleVal.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleAdd = this.handleAdd.bind(this);
 		this.handleTransition = this.handleTransition.bind(this);
@@ -32,17 +27,19 @@ class ColorForm extends React.Component {
 		this.handleSave = this.handleSave.bind(this);
 		this.handleInf = this.handleInf.bind(this);
 	}
-
-	handleColor(color, event) {
-		event.preventDefault();
-		document.querySelectorAll('.button').forEach((button) => {button.style.backgroundColor = color.hex})
-		if(color.hsl.l > 0.4) {
-			document.querySelectorAll('.buttonText').forEach((text) => {text.style.color = '#000000'})
+	handleVal(val, err) {
+		if(err) {
+			this.setState({error1 : "Please enter a number between 0 and 255"})
 		}
 		else {
-			document.querySelectorAll('.buttonText').forEach((text) => {text.style.color = '#FFFFFF'})
+			this.setState({error1 : ""})
 		}
-		this.setState({color: color.rgb});
+		this.setState({value: {
+									val: val,
+									err: err
+									}
+						})
+
 	}
 	handleTransition(val, err) {
 		if(err || this.state.wait.err) {
@@ -72,6 +69,9 @@ class ColorForm extends React.Component {
 	}
 	handleAdd(event) {
 		event.preventDefault();
+		if(this.state.value.err) {
+			return;
+		}
 		if(this.state.transition.val === "") {
 			this.setState({error1 : "You must specify a transition period"})
 			return;
@@ -89,36 +89,30 @@ class ColorForm extends React.Component {
 		else {
 			this.setState({error2: ""})
 		}
-		var colors = this.state.colors
-		colors.push({
-						r: this.state.color.r,
-						g: this.state.color.g,
-						b: this.state.color.b,
+		var values = this.state.values
+		values.push({
+						value: this.state.value.val,
 						t: this.state.transition.val,
 						w: this.state.wait.val
 					})
-		this.setState({	colors: colors})
+		this.setState({	values: values})
 	}
 	handleDel(index) {
-		var colors = this.state.colors
-		colors.splice(index, 1)
-		this.setState({colors: colors})
+		var values = this.state.values
+		values.splice(index, 1)
+		this.setState({values: values})
 	}
 	handleEdit(index) {
 		//load
-		const colors = this.state.colors
-		const color = colors[index]
-		this.setState({	color: {
-							r: color.r,
-							g: color.g,
-							b: color.b
-						},
+		const values = this.state.values
+		const value = values[index]
+		this.setState({	value: value.value,
 						transition: {
-									val: color.t,
+									val: value.t,
 									err: false
 									},
 						wait: {
-									val: color.w,
+									val: value.w,
 									err: false
 									},
 						edit: true,
@@ -139,15 +133,13 @@ class ColorForm extends React.Component {
 			this.setState({error1 : "Please enter only positive values"})
 			return;
 		}
-		var colors = this.state.colors
-		colors[this.state.editIndex] = {
-						r: this.state.color.r,
-						g: this.state.color.g,
-						b: this.state.color.b,
+		var values = this.state.values
+		values[this.state.editIndex] = {
+						value: this.state.value.val,
 						t: this.state.transition.val,
 						w: this.state.wait.val
 					}
-		this.setState({	colors: colors, edit: false})
+		this.setState({	values: values, edit: false})
 		event.preventDefault();
 	}
 	handleRep(val, err) {
@@ -164,7 +156,7 @@ class ColorForm extends React.Component {
 						})
 	}
 	handleInf(event) {
-		if(this.state.rep.err && this.state.colors.length !== 0) {
+		if(this.state.rep.err && this.state.values.length !== 0) {
 			this.setState({error2: ""})
 
 		}
@@ -178,8 +170,8 @@ class ColorForm extends React.Component {
 	}
 	handleSubmit(event) {
 		event.preventDefault();
-		if(this.state.colors.length === 0) {
-			this.setState({error2: "You must add a color first"})
+		if(this.state.values.length === 0) {
+			this.setState({error2: "You must add a value first"})
 			return;
 		}
 		if(this.state.rep.val === "" && !this.state.inf) {
@@ -189,14 +181,14 @@ class ColorForm extends React.Component {
 		if(this.state.rep.err && !this.state.inf) {
 			return;
 		}
-		fetch("/colors", {
+		fetch("/bright", {
 							method: 'POST',
 							headers: {
 								'Accept': 'application/json, text/plain, */*',
 								'Content-Type': 'application/json'
 							},
 							body: JSON.stringify({
-													colors: this.state.colors,
+													values: this.state.values,
 													reps: this.state.rep.val,
 													inf: this.state.inf
 												})
@@ -208,12 +200,12 @@ class ColorForm extends React.Component {
 							console.log('sent')
 							console.log(data)
 						})
-		this.setState({colors: []})
+		this.setState({values: []})
 	}
 
 	render() {
-		const colinfos = this.state.colors.map( (col, index) => 
-						{return <ColorInfo key={index} r={col.r} g={col.g} b={col.b} t={col.t} w={col.w} index={index} clickHandle={this.handleDel} edit={this.handleEdit}/> })
+		const valinfos = this.state.values.map( (val, index) => 
+						{return <ColorInfo key={index} r={val.value} g={val.value} b={val.value} t={val.t} w={val.w} index={index} clickHandle={this.handleDel} edit={this.handleEdit}/> })
 		const error1 = this.state.error1 !== "" ? <div id="err"><p>{this.state.error1}</p></div> : null
 		const error2 = this.state.error2 !== "" ? <div id="err"><p>{this.state.error2}</p></div> : null
 		const changingButton = this.state.edit ? (<div className="add button" onClick={this.handleSave}>
@@ -224,8 +216,8 @@ class ColorForm extends React.Component {
 												  </div>)
 		return (
 			<div id="form">
-				<h1>Select a Color:</h1>
-					<SketchPicker color={ this.state.color} onChange={ this.handleColor} width="30vw" disableAlpha={true}/>
+				<h1>Enter a Value:</h1>
+				<NumInputs label="" divclass="add" value={this.state.value} change={this.handleVal} min={0} max={255} />
 					<div className="inputs">
 						<NumInputs label="Transition Time (ms):" divclass="add" value={this.state.transition} change={this.handleTransition} min={0} />
 						<NumInputs label="Wait Time (ms):" divclass="add" value={this.state.wait} change={this.handleWait} min={0} />
@@ -233,7 +225,7 @@ class ColorForm extends React.Component {
 					</div>	
 					{error1}
 					<div id="tosend">
-						{colinfos}
+					{valinfos}
 					</div>
 					<div className="inputs">
 						<NumInputs label="Repetitions:" divclass="submit" value={this.state.rep} change={this.handleRep} min={1} disabled={this.state.inf}/>
@@ -251,4 +243,4 @@ class ColorForm extends React.Component {
 	}
 }
 
-export default ColorForm;
+export default BrightnessForm;

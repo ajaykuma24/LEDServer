@@ -1,5 +1,4 @@
 from flask import Flask, render_template, send_from_directory, request
-from os import environ, path
 import pigpio
 import time
 import threading
@@ -23,8 +22,6 @@ gpio.set_PWM_dutycycle(red, 0)
 gpio.set_PWM_dutycycle(green, 0) 
 gpio.set_PWM_dutycycle(blue, 0)
 gpio.set_PWM_dutycycle(white, 0) 
-
-here = path.abspath(path.dirname(__file__))
 
 app = Flask(__name__, static_folder='templates')
 
@@ -125,7 +122,6 @@ def index():
 
 @app.route('/<path:filename>')
 def send_asset(filename):
- 	print(path.join(here, '/templates/') + filename)
  	return send_from_directory(app.static_folder, filename)
 
 @app.route('/colors', methods=['POST'])
