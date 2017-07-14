@@ -33,6 +33,7 @@
     "react-color": "^2.13.1",
     "react-dom": "^15.5.4",
     "react-router": "^4.1.1",
+    "react-router-dom": "^4.1.1",
     "rimraf": "^2.6.1",
     "sass-loader": "^6.0.5",
     "style-loader": "^0.18.1",

@@ -31,65 +31,58 @@ def clip(x, lo, hi):
 def sleep(s=1000):
 	time.sleep(s/1000.0)
 
-def setcols(cols, R=0, G=0, B=0, W=0):
+def setcols(cols, R=0, G=0, B=0):
 	R = clip(R, 0.0, 255.0)
 	G = clip(G, 0.0, 255.0)
 	B = clip(B, 0.0, 255.0)
-	W = clip(W, 0.0, 255.0)
 	# print(str(R)+' '+str(G)+' '+str(B)+' '+str(W)+' ')
-	if(R==cols.r and G==cols.g and B==cols.b and W==cols.w):
+	if(R==cols.r and G==cols.g and B==cols.b):
 		return
 
 	cols.r=R
 	cols.g=G
 	cols.b=B
-	cols.w=W
 	
 	R = round(R/radj)
 	G = round(G/gadj)
 	B = round(B/badj)
-	W = round(W/wadj)
 
 	R = clip(R, 0.0, 255.0)
 	G = clip(G, 0.0, 255.0)
 	B = clip(B, 0.0, 255.0)
-	W = clip(W, 0.0, 255.0)
 
 	gpio.set_PWM_dutycycle(red, R)
 	gpio.set_PWM_dutycycle(green, G) 
 	gpio.set_PWM_dutycycle(blue, B) 
-	gpio.set_PWM_dutycycle(white, W) 
 
-def change(cols, R=0, G=0, B=0, W=0, wait=1000, changetime = 2000):
+def colchange(cols, R=0, G=0, B=0, wait=1000, changetime = 2000):
 	diff = changetime//delta
 	if(not (diff == 0)):
 		dr = (R-cols.r)/float(diff)
 		dg = (G-cols.g)/float(diff)
 		db = (B-cols.b)/float(diff)
-		dw = (W-cols.w)/float(diff)
 		for i in range(diff):
-			setcols(cols, cols.r+dr, cols.g+dg, cols.b+db, cols.w+dw)
+			setcols(cols, cols.r+dr, cols.g+dg, cols.b+db)
 			sleep(delta)
-	setcols(cols, R, G, B, W)
-	if(stopth.is_set()):
+	setcols(cols, R, G, B)
+	if(rgbstop.is_set()):
 		return
 	sleep(wait)
 
-def iterate(cols, data):
+def coliterate(cols, data):
 	for val in data:
-			if(stopth.is_set()):
+			if(rgbstop.is_set()):
 				print('return')
 				return
-			change(cols, int(val['r']), int(val['g']), int(val['b']), 0, int(val['w']), int(val['t']))
+			colchange(cols, int(val['r']), int(val['g']), int(val['b']), int(val['w']), int(val['t']))
 
 
-def control(q):
+def colcontrol(q):
 	class Struct(object):pass
 	cols=Struct()
 	cols.r=0.0
 	cols.g=0.0
 	cols.b=0.0
-	cols.w=0.0
 	print('start thread')	
 	while True:
 		data = q.get()
@@ -97,26 +90,90 @@ def control(q):
 		if(data is None):
 			print('exit')
 			return
-		if(stopth.is_set()):
+		if(rgbstop.is_set()):
 			print('clear')
-			stopth.clear()
+			rgbstop.clear()
 		if(data['inf']):
 			while True:
-				if(stopth.is_set()):
+				if(rgbstop.is_set()):
 					print('break')
 					break
-				iterate(cols, data['colors'])
+				coliterate(cols, data['colors'])
 				sleep(1)
 		else:
 			for x in range(int(data['reps'])):
-				if(stopth.is_set()):
+				if(rgbstop.is_set()):
 					print('break')
 					break
-				iterate(cols, data['colors'])
+				coliterate(cols, data['colors'])
 				sleep(1)
 		sleep(1)
 
-@app.route('/')
+def setw(val, W):
+	W=clip(W, 0, 255)
+	# print(str(R)+' '+str(G)+' '+str(B)+' '+str(W)+' ')
+	if(val.w==W):
+		return
+
+	val.w=W
+	
+	W=round(W/wadj)
+
+	W = clip(W, 0.0, 255.0)
+
+	gpio.set_PWM_dutycycle(white, W)
+
+def wchange(val, W=0, wait=1000, changetime = 2000):
+	diff = changetime//delta
+	if(not (diff == 0)):
+		dw = (W-val.w)/float(diff)
+		for i in range(diff):
+			setw(val, val.w+dw)
+			sleep(delta)
+	setw(val, W)
+	if(wstop.is_set()):
+		return
+	sleep(wait)
+
+def witerate(val, data):
+	for d in data:
+			if(wstop.is_set()):
+				print('return')
+				return
+			wchange(val, int(d['value']), int(d['w']), int(d['t']))
+
+
+def wcontrol(q):
+	class Struct(object):pass
+	val=Struct()
+	val.w=0.0
+	print('start thread')	
+	while True:
+		data = q.get()
+		print('got queue')
+		if(data is None):
+			print('exit')
+			return
+		if(wstop.is_set()):
+			print('clear')
+			wstop.clear()
+		if(data['inf']):
+			while True:
+				if(wstop.is_set()):
+					print('break')
+					break
+				witerate(val, data['values'])
+				sleep(1)
+		else:
+			for x in range(int(data['reps'])):
+				if(wstop.is_set()):
+					print('break')
+					break
+				witerate(val, data['values'])
+				sleep(1)
+		sleep(1)
+
+@app.route('/', methods=['GET'])
 def index():
 	return render_template('index.html')
 
@@ -128,8 +185,16 @@ def send_asset(filename):
 def setcolor():
 	d=request.get_json()
 	#change(d['r'], d['g'], d['b'], 0, 500, 3000)
-	stopth.set()
-	queue.put(d)
+	rgbstop.set()
+	rgbq.put(d)
+	return ('set!')
+
+@app.route('/bright', methods=['POST'])
+def setbright():
+	d=request.get_json()
+	#change(d['r'], d['g'], d['b'], 0, 500, 3000)
+	wstop.set()
+	wq.put(d)
 	return ('set!')
 
 def shutdown_server():
@@ -140,11 +205,16 @@ def shutdown_server():
 
 @app.route('/stop')
 def stop():
-	stopth.set()
-	queue.put(None)
-	queue.put(None)
-	queue.put(None)
-	runth.join()
+	rgbstop.set()
+	wstop.set()
+	rgbq.put(None)
+	rgbq.put(None)
+	rgbq.put(None)
+	wq.put(None)
+	wq.put(None)
+	wq.put(None)
+	rgbthread.join()
+	wthread.join()
 	gpio.set_PWM_dutycycle(red, 0)
 	gpio.set_PWM_dutycycle(green, 0) 
 	gpio.set_PWM_dutycycle(blue, 0)
@@ -154,10 +224,14 @@ def stop():
 	shutdown_server()
 	return 'stopped'
 
-queue = Queue()
-runth = threading.Thread(target=control, args=(queue,))
-runth.start()
-stopth = threading.Event()
+rgbq = Queue()
+wq = Queue()
+rgbthread = threading.Thread(target=colcontrol, args=(rgbq,))
+wthread = threading.Thread(target=wcontrol, args=(wq,))
+rgbthread.start()
+wthread.start()
+rgbstop = threading.Event()
+wstop = threading.Event()
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', debug=False, threaded=True)

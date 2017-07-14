@@ -1,4 +1,4 @@
 require("react");
-require("react-router");
+require("react-router-dom");
 require("react-color");
 require("react-dom");
