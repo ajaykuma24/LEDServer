@@ -1,10 +1,9 @@
 from flask import Flask, render_template, send_from_directory, request
-import pigpio
 import time
+import os
+import json
 import threading
 from Queue import Queue
-
-gpio = pigpio.pi()
 
 radj = 1.1
 gadj = 3.5
@@ -18,12 +17,8 @@ white = 23
 
 delta = 20
 
-gpio.set_PWM_dutycycle(red, 0)
-gpio.set_PWM_dutycycle(green, 0) 
-gpio.set_PWM_dutycycle(blue, 0)
-gpio.set_PWM_dutycycle(white, 0) 
-
-app = Flask(__name__, static_folder='templates')
+app = Flask(__name__, static_folder='public')
+fileDir = os.path.dirname(os.path.realpath('__file__'))
 
 def clip(x, lo, hi):
 	return lo if x <= lo else hi if x >= hi else x
@@ -50,10 +45,6 @@ def setcols(cols, R=0, G=0, B=0):
 	R = clip(R, 0.0, 255.0)
 	G = clip(G, 0.0, 255.0)
 	B = clip(B, 0.0, 255.0)
-
-	gpio.set_PWM_dutycycle(red, R)
-	gpio.set_PWM_dutycycle(green, G) 
-	gpio.set_PWM_dutycycle(blue, B) 
 
 def colchange(cols, R=0, G=0, B=0, wait=1000, changetime = 2000):
 	diff = changetime//delta
@@ -121,8 +112,6 @@ def setw(val, W):
 
 	W = clip(W, 0.0, 255.0)
 
-	gpio.set_PWM_dutycycle(white, W)
-
 def wchange(val, W=0, wait=1000, changetime = 2000):
 	diff = changetime//delta
 	if(not (diff == 0)):
@@ -174,12 +163,14 @@ def wcontrol(q):
 		sleep(1)
 
 @app.route('/', methods=['GET'])
+@app.route('/rgb', methods=['GET'])
+@app.route('/w', methods=['GET'])
 def index():
-	return render_template('index.html')
+	return send_from_directory(app.static_folder, 'index.html')
 
 @app.route('/<path:filename>')
 def send_asset(filename):
- 	return send_from_directory(app.static_folder, filename)
+	return send_from_directory(app.static_folder, filename)
 
 @app.route('/colors', methods=['POST'])
 def setcolor():
@@ -197,11 +188,44 @@ def setbright():
 	wq.put(d)
 	return ('set!')
 
+@app.route('/save', methods=['POST', 'GET'])
+def update():
+	if(request.method == "GET"):
+		with open(os.path.join(fileDir, 'public/data.json'), "a+") as jsonFile:
+			try:
+				jsonFile.seek(0)  # rewind
+				data = json.load(jsonFile)
+			except:
+				data = {"msg": 'error'}
+			jsonFile.close()
+			return json.dumps(data)
+
+	if(request.method == "POST"):
+		d=request.get_json()
+		with open(os.path.join(fileDir, 'public/data.json'), "a+") as jsonFile:
+			jsonFile.seek(0)  # rewind
+			olddata = json.load(jsonFile)
+			toadd = request.get_json()
+			if("colors" in toadd):
+				olddata["colors"] = toadd["colors"]
+				
+			else:
+				olddata["values"] = toadd["values"]
+
+			jsonFile.seek(0)  # rewind
+			jsonFile.truncate()
+			json.dump(olddata, jsonFile)
+			jsonFile.truncate()
+			jsonFile.close()
+			return('set!')
+	#change(d['r'], d['g'], d['b'], 0, 500, 3000)
+	return ('set!')
+
 def shutdown_server():
-    func = request.environ.get('werkzeug.server.shutdown')
-    if func is None:
-        raise RuntimeError('Not running with the Werkzeug Server')
-    func()
+	func = request.environ.get('werkzeug.server.shutdown')
+	if func is None:
+		raise RuntimeError('Not running with the Werkzeug Server')
+	func()
 
 @app.route('/stop')
 def stop():
@@ -214,12 +238,6 @@ def stop():
 	wq.put(None)
 	wq.put(None)
 	rgbthread.join()
-	wthread.join()
-	gpio.set_PWM_dutycycle(red, 0)
-	gpio.set_PWM_dutycycle(green, 0) 
-	gpio.set_PWM_dutycycle(blue, 0)
-	gpio.set_PWM_dutycycle(white, 0) 
-	gpio.stop()
 	print('joined')
 	shutdown_server()
 	return 'stopped'

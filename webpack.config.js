@@ -15,7 +15,7 @@ module.exports = {
         ],
 
         output: {
-            path: Path.join(__dirname, './templates/'),
+            path: Path.join(__dirname, './public/'),
             filename: jsOutputPath,
         },
 

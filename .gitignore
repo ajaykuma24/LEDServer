@@ -6,3 +6,5 @@ dll/vendor-manifest.json
 server.pyc
 logs/
 logs/*
+public/
+public/*

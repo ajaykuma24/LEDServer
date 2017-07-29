@@ -13,7 +13,8 @@ class BrightnessForm extends React.Component {
 			inf: false,
 			error1: "",
 			error2: "",
-			edit: false
+			edit: false,
+			saved: []
 		}
 
 		this.handleVal = this.handleVal.bind(this);
@@ -26,6 +27,37 @@ class BrightnessForm extends React.Component {
 		this.handleEdit = this.handleEdit.bind(this);
 		this.handleSave = this.handleSave.bind(this);
 		this.handleInf = this.handleInf.bind(this);
+		this.handleValSave = this.handleValSave.bind(this);
+	}
+	componentWillMount() {
+		fetch("/save", {
+							method: 'GET'
+						})
+						.then(function(res) {
+							return res.json();
+						})
+						.then( (data) => {if(!data.msg) this.setState({saved: data.values})})
+
+	}
+	componentWillUnmount() {
+		fetch("/save", {
+							method: 'POST',
+							headers: {
+								'Accept': 'application/json, text/plain, */*',
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({
+													values: this.state.saved,
+												})
+						})
+						.then(function(res) {
+							return res.text();
+						})
+						.then(function(data) {
+							console.log('sent')
+							console.log(data)
+						})
+
 	}
 	handleVal(val, err) {
 		if(err) {
@@ -202,6 +234,28 @@ class BrightnessForm extends React.Component {
 						})
 		this.setState({values: []})
 	}
+	handleValSave(event) {
+		event.preventDefault();
+		if(this.state.colors.length === 0) {
+			this.setState({error2: "You must add a value first"})
+			return;
+		}
+		var saved = this.state.saved
+		saved.push({values: JSON.parse(JSON.stringify(this.state.values))})
+		this.setState({saved: saved})
+	}
+	handleValDel(index, event) {
+		event.preventDefault();
+		var saved = this.state.saved
+		saved.splice(index, 1)
+		this.setState({saved: saved})
+
+	}
+	handleValLoad(index, event) {
+		event.preventDefault();
+		this.setState({colors: this.state.saved[index].colors})
+		
+	}
 
 	render() {
 		const valinfos = this.state.values.map( (val, index) => 
@@ -214,6 +268,10 @@ class BrightnessForm extends React.Component {
 											   : (<div className="add button" onClick={this.handleAdd}>
 													<p className="buttonText">Add</p>
 												  </div>)
+		const saved = this.state.saved ? (this.state.saved.map((val, index) =>
+						{return <div className="button" key={index} onClick={this.handleColLoad.bind(this, index)} onContextMenu={this.handleColDel.bind(this, index)}> 
+							<p className="buttonText">Pattern {index + 1}</p>
+						</div>})) : null
 		return (
 			<div id="form">
 				<h1>Enter a Value:</h1>
@@ -227,6 +285,9 @@ class BrightnessForm extends React.Component {
 					<div id="tosend">
 					{valinfos}
 					</div>
+					<div className="button" onClick={this.handleColSave}>
+													<p className="buttonText">Save</p>
+												  </div>
 					<div className="inputs">
 						<NumInputs label="Repetitions:" divclass="submit" value={this.state.rep} change={this.handleRep} min={1} disabled={this.state.inf}/>
 						<div className="submit" id="check">
@@ -238,6 +299,7 @@ class BrightnessForm extends React.Component {
 						</div>
 					</div>
 					{error2}
+					{saved}
 			</div>
 		);
 	}

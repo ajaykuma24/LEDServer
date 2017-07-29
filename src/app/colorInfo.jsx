@@ -6,7 +6,7 @@ class ColorInfo extends React.Component {
 	}
 	contextMenu(event) {
 		event.preventDefault();
-		this.props.edit(this.props.index);
+		this.props.del(this.props.index);
 	}
 	handleClick(event) {
 		event.preventDefault();
