@@ -35,7 +35,7 @@ class ColorForm extends React.Component {
 		this.handleColSave = this.handleColSave.bind(this);
 	}
 
-	componentWillMount() {
+	componentDidMount() {
 	 document.querySelectorAll('.button.change').forEach((button) => {button.style.backgroundColor='black'})
 		fetch("/save", {
 							method: 'GET'

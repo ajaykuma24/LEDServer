@@ -18,6 +18,7 @@ class BrightnessForm extends React.Component {
 		}
 
 		this.handleVal = this.handleVal.bind(this);
+		this.handleSlider = this.handleSlider.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleAdd = this.handleAdd.bind(this);
 		this.handleTransition = this.handleTransition.bind(this);
@@ -29,7 +30,7 @@ class BrightnessForm extends React.Component {
 		this.handleInf = this.handleInf.bind(this);
 		this.handleValSave = this.handleValSave.bind(this);
 	}
-	componentWillMount() {
+	componentDidMount() {
 		fetch("/save", {
 							method: 'GET'
 						})
@@ -65,13 +66,21 @@ class BrightnessForm extends React.Component {
 		}
 		else {
 			this.setState({error1 : ""})
+			document.getElementById('slider').value=val
 		}
 		this.setState({value: {
 									val: val,
 									err: err
-									}
+								}
 						})
 
+	}
+	handleSlider(event) {
+		this.setState({value: {
+								val: event.target.value,
+								err: false
+								}
+		})
 	}
 	handleTransition(val, err) {
 		if(err || this.state.wait.err) {
@@ -259,7 +268,8 @@ class BrightnessForm extends React.Component {
 
 	render() {
 		const valinfos = this.state.values.map( (val, index) => 
-						{return <ColorInfo key={index} r={val.value} g={val.value} b={val.value} t={val.t} w={val.w} index={index} clickHandle={this.handleDel} edit={this.handleEdit}/> })
+						{return <ColorInfo key={index} r={val.value} g={val.value} b={val.value} t={val.t} w={val.w} 
+												index={index} clickHandle={this.handleDel} edit={this.handleEdit}/> })
 		const error1 = this.state.error1 !== "" ? <div id="err"><p>{this.state.error1}</p></div> : null
 		const error2 = this.state.error2 !== "" ? <div id="err"><p>{this.state.error2}</p></div> : null
 		const changingButton = this.state.edit ? (<div className="add button" onClick={this.handleSave}>
@@ -276,6 +286,20 @@ class BrightnessForm extends React.Component {
 			<div id="form">
 				<h1>Enter a Value:</h1>
 				<NumInputs label="" divclass="add" value={this.state.value} change={this.handleVal} min={0} max={255} />
+				<input id="slider" type="range" list="steps" name="val" min="0" max="255" defaultValue={0}  step="1" onChange={this.handleSlider} />
+				<datalist id="steps">
+				    <option value="0" />
+				    <option value="25" />
+				    <option value="50" />
+				    <option value="75" />
+				    <option value="100" />
+				    <option value="125" />
+				    <option value="150" />
+				    <option value="175" />
+				    <option value="200" />
+				    <option value="225" />
+				    <option value="250" />
+				</datalist> 
 					<div className="inputs">
 						<NumInputs label="Transition Time (ms):" divclass="add" value={this.state.transition} change={this.handleTransition} min={0} />
 						<NumInputs label="Wait Time (ms):" divclass="add" value={this.state.wait} change={this.handleWait} min={0} />
