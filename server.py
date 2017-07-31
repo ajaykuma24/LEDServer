@@ -89,14 +89,14 @@ def colcontrol(q):
 				if(rgbstop.is_set()):
 					print('break')
 					break
-				coliterate(cols, data['colors'])
+				coliterate(cols, data['data'])
 				sleep(1)
 		else:
 			for x in range(int(data['reps'])):
 				if(rgbstop.is_set()):
 					print('break')
 					break
-				coliterate(cols, data['colors'])
+				coliterate(cols, data['data'])
 				sleep(1)
 		sleep(1)
 
@@ -151,14 +151,14 @@ def wcontrol(q):
 				if(wstop.is_set()):
 					print('break')
 					break
-				witerate(val, data['values'])
+				witerate(val, data['data'])
 				sleep(1)
 		else:
 			for x in range(int(data['reps'])):
 				if(wstop.is_set()):
 					print('break')
 					break
-				witerate(val, data['values'])
+				witerate(val, data['data'])
 				sleep(1)
 		sleep(1)
 

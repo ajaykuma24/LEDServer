@@ -1,6 +1,7 @@
 import ColorInfo from './colorInfo';
 import { SketchPicker } from 'react-color';
 import NumInputs from './numInputs';
+import Submit from './submit';
 
 class ColorForm extends React.Component {
 	constructor(props) {
@@ -13,26 +14,20 @@ class ColorForm extends React.Component {
 			},
 			transition: {val: "", err: false},
 			wait: {val: "", err: false},
-			rep: {val: "1", err: false},
 			colors: [],
-			inf: false,
 			error1: "",
-			error2: "",
 			edit: false,
 			saveName: "",
 			saved: []
 		}
 
 		this.handleColor = this.handleColor.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleAdd = this.handleAdd.bind(this);
 		this.handleTransition = this.handleTransition.bind(this);
 		this.handleWait = this.handleWait.bind(this);
-		this.handleRep = this.handleRep.bind(this);
 		this.handleDel = this.handleDel.bind(this);
 		this.handleEdit = this.handleEdit.bind(this);
 		this.handleSave = this.handleSave.bind(this);
-		this.handleInf = this.handleInf.bind(this);
 		this.handleColSave = this.handleColSave.bind(this);
 		this.handlesaveName = this.handlesaveName.bind(this);
 	}
@@ -118,12 +113,6 @@ class ColorForm extends React.Component {
 		if(this.state.transition.err || this.state.wait.err) {
 			return;
 		}
-		if(this.state.rep.err && !this.state.inf) {
-			this.setState({error2: "Please enter only positive values"})
-		}
-		else {
-			this.setState({error2: ""})
-		}
 		var colors = this.state.colors
 		colors.push({
 						r: this.state.color.r,
@@ -185,70 +174,11 @@ class ColorForm extends React.Component {
 		this.setState({	colors: colors, edit: false})
 		event.preventDefault();
 	}
-	handleRep(val, err) {
-		if(err) {
-			this.setState({error2 : "Please enter only positive values"})
-		}
-		else {
-			this.setState({error2 : ""})
-		}
-		this.setState({rep: {
-									val: val,
-									err: err
-									}
-						})
-	}
-	handleInf(event) {
-		if(this.state.rep.err && this.state.colors.length !== 0) {
-			this.setState({error2: ""})
-
-		}
-		if(!this.state.inf)
-			this.setState({rep: {
-									val: "",
-									err: false
-								}
-						})
-		this.setState({inf: !this.state.inf})
-	}
-	handleSubmit(event) {
-		event.preventDefault();
-		if(this.state.colors.length === 0) {
-			this.setState({error2: "You must add a color first"})
-			return;
-		}
-		if(this.state.rep.val === "" && !this.state.inf) {
-			this.setState({error2 : "You must specify a number of repetitions"})
-			return;
-		}
-		if(this.state.rep.err && !this.state.inf) {
-			return;
-		}
-		fetch("/colors", {
-							method: 'POST',
-							headers: {
-								'Accept': 'application/json, text/plain, */*',
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({
-													colors: this.state.colors,
-													reps: this.state.rep.val,
-													inf: this.state.inf
-												})
-						})
-						.then(function(res) {
-							return res.text();
-						})
-						.then(function(data) {
-							console.log('sent')
-							console.log(data)
-						})
-		this.setState({colors: []})
-	}
+	
 	handleColSave(event) {
 		event.preventDefault();
 		if(this.state.colors.length === 0) {
-			this.setState({error2: "You must add a color first"})
+			this.setState({error1: "You must add a color first"})
 			return;
 		}
 		var saved = this.state.saved
@@ -277,7 +207,6 @@ class ColorForm extends React.Component {
 		const colinfos = this.state.colors.map( (col, index) => 
 						{return <ColorInfo key={index} r={col.r} g={col.g} b={col.b} t={col.t} w={col.w} index={index} clickHandle={this.handleEdit} del={this.handleDel}/> })
 		const error1 = this.state.error1 !== "" ? <div id="err"><p>{this.state.error1}</p></div> : null
-		const error2 = this.state.error2 !== "" ? <div id="err"><p>{this.state.error2}</p></div> : null
 		const changingButton = this.state.edit ? (<div className="add button change" onClick={this.handleSave}>
 													<p className="buttonText change">Save</p>
 												  </div>)
@@ -305,17 +234,7 @@ class ColorForm extends React.Component {
 					<div className="button" id="patternSave" onClick={this.handleColSave}>
 						<p className="buttonText">Save</p>
 					</div>
-					<div className="inputs">
-						<NumInputs label="Repetitions:" divclass="submit" value={this.state.rep} change={this.handleRep} min={1} disabled={this.state.inf}/>
-						<div className="submit" id="check">
-							<p>Infinite:</p>
-							<input type="checkbox" className="check" onChange={this.handleInf}/>
-						</div>
-						<div className="submit button change" onClick={this.handleSubmit}>
-							<p className="buttonText change">Submit</p>
-						</div>
-					</div>
-					{error2}
+					<Submit url="colors" toSubmit={this.state.colors} />
 					{saved}
 			</div>
 		);

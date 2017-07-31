@@ -1,5 +1,6 @@
 import NumInputs from './numInputs';
 import ColorInfo from './colorInfo';
+import Submit from './submit';
 
 class BrightnessForm extends React.Component {
 	constructor(props) {
@@ -8,11 +9,8 @@ class BrightnessForm extends React.Component {
 			value: {val: "", err: false},
 			transition: {val: "", err: false},
 			wait: {val: "", err: false},
-			rep: {val: "1", err: false},
 			values: [],
-			inf: false,
 			error1: "",
-			error2: "",
 			edit: false,
 			saveName: "",
 			saved: []
@@ -20,15 +18,12 @@ class BrightnessForm extends React.Component {
 
 		this.handleVal = this.handleVal.bind(this);
 		this.handleSlider = this.handleSlider.bind(this);
-		this.handleSubmit = this.handleSubmit.bind(this);
 		this.handleAdd = this.handleAdd.bind(this);
 		this.handleTransition = this.handleTransition.bind(this);
 		this.handleWait = this.handleWait.bind(this);
-		this.handleRep = this.handleRep.bind(this);
 		this.handleDel = this.handleDel.bind(this);
 		this.handleEdit = this.handleEdit.bind(this);
 		this.handleSave = this.handleSave.bind(this);
-		this.handleInf = this.handleInf.bind(this);
 		this.handleValSave = this.handleValSave.bind(this);
 		this.handlesaveName = this.handlesaveName.bind(this);
 	}
@@ -126,12 +121,6 @@ class BrightnessForm extends React.Component {
 		if(this.state.transition.err || this.state.wait.err) {
 			return;
 		}
-		if(this.state.rep.err && !this.state.inf) {
-			this.setState({error2: "Please enter only positive values"})
-		}
-		else {
-			this.setState({error2: ""})
-		}
 		var values = this.state.values
 		values.push({
 						value: this.state.value.val,
@@ -214,40 +203,6 @@ class BrightnessForm extends React.Component {
 						})
 		this.setState({inf: !this.state.inf})
 	}
-	handleSubmit(event) {
-		event.preventDefault();
-		if(this.state.values.length === 0) {
-			this.setState({error2: "You must add a value first"})
-			return;
-		}
-		if(this.state.rep.val === "" && !this.state.inf) {
-			this.setState({error2 : "You must specify a number of repetitions"})
-			return;
-		}
-		if(this.state.rep.err && !this.state.inf) {
-			return;
-		}
-		fetch("/bright", {
-							method: 'POST',
-							headers: {
-								'Accept': 'application/json, text/plain, */*',
-								'Content-Type': 'application/json'
-							},
-							body: JSON.stringify({
-													values: this.state.values,
-													reps: this.state.rep.val,
-													inf: this.state.inf
-												})
-						})
-						.then(function(res) {
-							return res.text();
-						})
-						.then(function(data) {
-							console.log('sent')
-							console.log(data)
-						})
-		this.setState({values: []})
-	}
 	handleValSave(event) {
 		event.preventDefault();
 		if(this.state.values.length === 0) {
@@ -322,17 +277,7 @@ class BrightnessForm extends React.Component {
 					<div className="button" id="patternSave" onClick={this.handleValSave}>
 						<p className="buttonText">Save</p>
 					</div>
-					<div className="inputs">
-						<NumInputs label="Repetitions:" divclass="submit" value={this.state.rep} change={this.handleRep} min={1} disabled={this.state.inf}/>
-						<div className="submit" id="check">
-							<p>Infinite:</p>
-							<input type="checkbox" className="check" onChange={this.handleInf}/>
-						</div>
-						<div className="submit button" onClick={this.handleSubmit}>
-							<p className="buttonText">Submit</p>
-						</div>
-					</div>
-					{error2}
+					<Submit url="bright" toSubmit={this.state.values} />
 					{saved}
 			</div>
 		);
