@@ -14,6 +14,7 @@ class BrightnessForm extends React.Component {
 			error1: "",
 			error2: "",
 			edit: false,
+			saveName: "",
 			saved: []
 		}
 
@@ -29,6 +30,7 @@ class BrightnessForm extends React.Component {
 		this.handleSave = this.handleSave.bind(this);
 		this.handleInf = this.handleInf.bind(this);
 		this.handleValSave = this.handleValSave.bind(this);
+		this.handlesaveName = this.handlesaveName.bind(this);
 	}
 	componentDidMount() {
 		fetch("/save", {
@@ -147,7 +149,10 @@ class BrightnessForm extends React.Component {
 		//load
 		const values = this.state.values
 		const value = values[index]
-		this.setState({	value: value.value,
+		this.setState({	value: {
+							val: value.value,
+							err: false
+						},
 						transition: {
 									val: value.t,
 									err: false
@@ -245,13 +250,17 @@ class BrightnessForm extends React.Component {
 	}
 	handleValSave(event) {
 		event.preventDefault();
-		if(this.state.colors.length === 0) {
+		if(this.state.values.length === 0) {
 			this.setState({error2: "You must add a value first"})
 			return;
 		}
 		var saved = this.state.saved
-		saved.push({values: JSON.parse(JSON.stringify(this.state.values))})
+		saved.push({values: JSON.parse(JSON.stringify(this.state.values)), name: this.state.saveName})
 		this.setState({saved: saved})
+	}
+	handlesaveName(event) {
+		event.preventDefault();
+		this.setState({saveName: event.target.value});
 	}
 	handleValDel(index, event) {
 		event.preventDefault();
@@ -262,14 +271,14 @@ class BrightnessForm extends React.Component {
 	}
 	handleValLoad(index, event) {
 		event.preventDefault();
-		this.setState({colors: this.state.saved[index].colors})
+		this.setState({values: this.state.saved[index].values})
 		
 	}
 
 	render() {
 		const valinfos = this.state.values.map( (val, index) => 
 						{return <ColorInfo key={index} r={val.value} g={val.value} b={val.value} t={val.t} w={val.w} 
-												index={index} clickHandle={this.handleDel} edit={this.handleEdit}/> })
+												index={index} clickHandle={this.handleEdit} del={this.handleDel}/> })
 		const error1 = this.state.error1 !== "" ? <div id="err"><p>{this.state.error1}</p></div> : null
 		const error2 = this.state.error2 !== "" ? <div id="err"><p>{this.state.error2}</p></div> : null
 		const changingButton = this.state.edit ? (<div className="add button" onClick={this.handleSave}>
@@ -279,8 +288,8 @@ class BrightnessForm extends React.Component {
 													<p className="buttonText">Add</p>
 												  </div>)
 		const saved = this.state.saved ? (this.state.saved.map((val, index) =>
-						{return <div className="button" key={index} onClick={this.handleColLoad.bind(this, index)} onContextMenu={this.handleColDel.bind(this, index)}> 
-							<p className="buttonText">Pattern {index + 1}</p>
+						{return <div className="button saved" key={index} onClick={this.handleValLoad.bind(this, index)} onContextMenu={this.handleValDel.bind(this, index)}> 
+							<p className="buttonText">{val.name}</p>
 						</div>})) : null
 		return (
 			<div id="form">
@@ -309,9 +318,10 @@ class BrightnessForm extends React.Component {
 					<div id="tosend">
 					{valinfos}
 					</div>
-					<div className="button" onClick={this.handleColSave}>
-													<p className="buttonText">Save</p>
-												  </div>
+					<input type="text" className="text" id="saveName" value={this.state.saveName} onChange={this.handlesaveName} />
+					<div className="button" id="patternSave" onClick={this.handleValSave}>
+						<p className="buttonText">Save</p>
+					</div>
 					<div className="inputs">
 						<NumInputs label="Repetitions:" divclass="submit" value={this.state.rep} change={this.handleRep} min={1} disabled={this.state.inf}/>
 						<div className="submit" id="check">

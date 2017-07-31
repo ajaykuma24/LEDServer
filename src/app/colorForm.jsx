@@ -19,6 +19,7 @@ class ColorForm extends React.Component {
 			error1: "",
 			error2: "",
 			edit: false,
+			saveName: "",
 			saved: []
 		}
 
@@ -33,6 +34,7 @@ class ColorForm extends React.Component {
 		this.handleSave = this.handleSave.bind(this);
 		this.handleInf = this.handleInf.bind(this);
 		this.handleColSave = this.handleColSave.bind(this);
+		this.handlesaveName = this.handlesaveName.bind(this);
 	}
 
 	componentDidMount() {
@@ -250,8 +252,12 @@ class ColorForm extends React.Component {
 			return;
 		}
 		var saved = this.state.saved
-		saved.push({colors: JSON.parse(JSON.stringify(this.state.colors))})
+		saved.push({colors: JSON.parse(JSON.stringify(this.state.colors)), name: this.state.saveName})
 		this.setState({saved: saved})
+	}
+	handlesaveName(event) {
+		event.preventDefault();
+		this.setState({saveName: event.target.value});
 	}
 	handleColDel(index, event) {
 		event.preventDefault();
@@ -279,8 +285,8 @@ class ColorForm extends React.Component {
 													<p className="buttonText change">Add</p>
 												  </div>)
 		const saved = this.state.saved ? (this.state.saved.map((col, index) =>
-						{return <div className="button" key={index} onClick={this.handleColLoad.bind(this, index)} onContextMenu={this.handleColDel.bind(this, index)}> 
-							<p className="buttonText">Pattern {index + 1}</p>
+						{return <div className="button saved" key={index} onClick={this.handleColLoad.bind(this, index)} onContextMenu={this.handleColDel.bind(this, index)}> 
+							<p className="buttonText">{col.name}</p>
 						</div>})) : null
 		return (
 			<div id="form">
@@ -295,9 +301,10 @@ class ColorForm extends React.Component {
 					<div id="tosend">
 						{colinfos}
 					</div>
-					<div className="button" onClick={this.handleColSave}>
-													<p className="buttonText">Save</p>
-												  </div>
+					<input type="text" className="text" id="saveName" value={this.state.saveName} onChange={this.handlesaveName} />
+					<div className="button" id="patternSave" onClick={this.handleColSave}>
+						<p className="buttonText">Save</p>
+					</div>
 					<div className="inputs">
 						<NumInputs label="Repetitions:" divclass="submit" value={this.state.rep} change={this.handleRep} min={1} disabled={this.state.inf}/>
 						<div className="submit" id="check">
