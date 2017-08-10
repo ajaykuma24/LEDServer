@@ -1,9 +1,12 @@
 from flask import Flask, render_template, send_from_directory, request
+import pigpio
 import time
 import os
 import json
 import threading
 from Queue import Queue
+
+gpio = pigpio.pi()
 
 radj = 1.1
 gadj = 3.5
@@ -16,6 +19,11 @@ blue = 18
 white = 23
 
 delta = 20
+
+gpio.set_PWM_dutycycle(red, 0)
+gpio.set_PWM_dutycycle(green, 0) 
+gpio.set_PWM_dutycycle(blue, 0)
+gpio.set_PWM_dutycycle(white, 0) 
 
 app = Flask(__name__, static_folder='public')
 fileDir = os.path.dirname(os.path.realpath('__file__'))
@@ -45,6 +53,10 @@ def setcols(cols, R=0, G=0, B=0):
 	R = clip(R, 0.0, 255.0)
 	G = clip(G, 0.0, 255.0)
 	B = clip(B, 0.0, 255.0)
+
+	gpio.set_PWM_dutycycle(red, R)
+ 	gpio.set_PWM_dutycycle(green, G) 
+ 	gpio.set_PWM_dutycycle(blue, B) 
 
 def colchange(cols, R=0, G=0, B=0, wait=1000, changetime = 2000):
 	diff = changetime//delta
@@ -111,6 +123,8 @@ def setw(val, W):
 	W=round(W/wadj)
 
 	W = clip(W, 0.0, 255.0)
+
+	gpio.set_PWM_dutycycle(white, W)
 
 def wchange(val, W=0, wait=1000, changetime = 2000):
 	diff = changetime//delta
@@ -239,6 +253,11 @@ def stop():
 	wq.put(None)
 	rgbthread.join()
 	print('joined')
+	gpio.set_PWM_dutycycle(red, 0)
+ 	gpio.set_PWM_dutycycle(green, 0) 
+ 	gpio.set_PWM_dutycycle(blue, 0)
+ 	gpio.set_PWM_dutycycle(white, 0) 
+ 	gpio.stop()
 	shutdown_server()
 	return 'stopped'
 
