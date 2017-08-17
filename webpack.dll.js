@@ -14,10 +14,15 @@ module.exports = {
         new webpack.DllPlugin({
             path: path.join(__dirname, "dll", "[name]-manifest.json"),
             name: "[name]",
-            context: path.resolve(__dirname )
+            context: path.resolve(__dirname)
         }),
         new webpack.optimize.OccurrenceOrderPlugin(),
-        // new webpack.optimize.UglifyJsPlugin()
+        new webpack.optimize.UglifyJsPlugin(),
+        new webpack.DefinePlugin({
+            "process.env": {
+                NODE_ENV: JSON.stringify("production")
+            }
+        })
     ],
     resolve: {
         modules: [path.resolve(__dirname), "node_modules"]

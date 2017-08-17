@@ -20,7 +20,7 @@ class ColorForm extends React.Component {
 			saveName: "",
 			saved: []
 		}
-
+		this.updateSaved = this.updateSaved.bind(this);
 		this.handleColor = this.handleColor.bind(this);
 		this.handleAdd = this.handleAdd.bind(this);
 		this.handleTransition = this.handleTransition.bind(this);
@@ -44,6 +44,9 @@ class ColorForm extends React.Component {
 
 	}
 	componentWillUnmount() {
+		this.updateSaved();
+	}
+	updateSaved() {
 		fetch("/save", {
 							method: 'POST',
 							headers: {
@@ -61,7 +64,6 @@ class ColorForm extends React.Component {
 							console.log('sent')
 							console.log(data)
 						})
-
 	}
 	handleColor(color, event) {
 		event.preventDefault();
@@ -184,6 +186,7 @@ class ColorForm extends React.Component {
 		var saved = this.state.saved
 		saved.push({colors: JSON.parse(JSON.stringify(this.state.colors)), name: this.state.saveName})
 		this.setState({saved: saved})
+		this.updateSaved();
 	}
 	handlesaveName(event) {
 		event.preventDefault();

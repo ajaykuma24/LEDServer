@@ -15,7 +15,7 @@ class BrightnessForm extends React.Component {
 			saveName: "",
 			saved: []
 		}
-
+		this.updateSaved = this.updateSaved.bind(this);
 		this.handleVal = this.handleVal.bind(this);
 		this.handleSlider = this.handleSlider.bind(this);
 		this.handleAdd = this.handleAdd.bind(this);
@@ -38,6 +38,9 @@ class BrightnessForm extends React.Component {
 
 	}
 	componentWillUnmount() {
+		this.updateSaved()
+	}
+	updateSaved() {
 		fetch("/save", {
 							method: 'POST',
 							headers: {
@@ -212,6 +215,7 @@ class BrightnessForm extends React.Component {
 		var saved = this.state.saved
 		saved.push({values: JSON.parse(JSON.stringify(this.state.values)), name: this.state.saveName})
 		this.setState({saved: saved})
+		this.updateSaved();
 	}
 	handlesaveName(event) {
 		event.preventDefault();
