@@ -12,8 +12,8 @@ class ColorForm extends React.Component {
 				g: 0,
 				b: 0
 			},
-			transition: {val: "", err: false},
-			wait: {val: "", err: false},
+			transition: {val: "5000", err: false},
+			wait: {val: "100", err: false},
 			colors: [],
 			error1: "",
 			edit: false,

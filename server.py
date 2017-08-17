@@ -24,9 +24,14 @@ gpio.set_PWM_dutycycle(red, 0)
 gpio.set_PWM_dutycycle(green, 0) 
 gpio.set_PWM_dutycycle(blue, 0)
 gpio.set_PWM_dutycycle(white, 0) 
+gpio.set_PWM_frequency(red, 80)
+gpio.set_PWM_frequency(green, 80)
+gpio.set_PWM_frequency(blue, 80)
+gpio.set_PWM_frequency(white, 80)
 
 app = Flask(__name__, static_folder='public')
-fileDir = os.path.dirname(os.path.realpath('__file__'))
+__location__ = os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 def clip(x, lo, hi):
 	return lo if x <= lo else hi if x >= hi else x
@@ -189,7 +194,6 @@ def send_asset(filename):
 @app.route('/colors', methods=['POST'])
 def setcolor():
 	d=request.get_json()
-	#change(d['r'], d['g'], d['b'], 0, 500, 3000)
 	rgbstop.set()
 	rgbq.put(d)
 	return ('set!')
@@ -197,7 +201,6 @@ def setcolor():
 @app.route('/bright', methods=['POST'])
 def setbright():
 	d=request.get_json()
-	#change(d['r'], d['g'], d['b'], 0, 500, 3000)
 	wstop.set()
 	wq.put(d)
 	return ('set!')
@@ -205,7 +208,7 @@ def setbright():
 @app.route('/save', methods=['POST', 'GET'])
 def update():
 	if(request.method == "GET"):
-		with open(os.path.join(fileDir, 'public/data.json'), "a+") as jsonFile:
+		with open(os.path.join(__location__, 'public/data.json'), "a+") as jsonFile:
 			try:
 				jsonFile.seek(0)  # rewind
 				data = json.load(jsonFile)
@@ -216,7 +219,7 @@ def update():
 
 	if(request.method == "POST"):
 		d=request.get_json()
-		with open(os.path.join(fileDir, 'public/data.json'), "a+") as jsonFile:
+		with open(os.path.join(__location__, 'public/data.json'), "a+") as jsonFile:
 			jsonFile.seek(0)  # rewind
 			olddata = json.load(jsonFile)
 			toadd = request.get_json()
@@ -232,7 +235,6 @@ def update():
 			jsonFile.truncate()
 			jsonFile.close()
 			return('set!')
-	#change(d['r'], d['g'], d['b'], 0, 500, 3000)
 	return ('set!')
 
 def shutdown_server():
@@ -252,6 +254,7 @@ def stop():
 	wq.put(None)
 	wq.put(None)
 	rgbthread.join()
+	wthread.join()
 	print('joined')
 	gpio.set_PWM_dutycycle(red, 0)
  	gpio.set_PWM_dutycycle(green, 0) 
@@ -271,4 +274,4 @@ rgbstop = threading.Event()
 wstop = threading.Event()
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', debug=False, threaded=True)
+	app.run(host='0.0.0.0', debug=True, threaded=True, port=80)
