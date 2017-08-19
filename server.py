@@ -225,12 +225,12 @@ def update():
 			toadd = request.get_json()
 			if("colors" in toadd):
 				olddata["colors"] = toadd["colors"]
-				
-			else:
+			elif("values" in toadd):
 				olddata["values"] = toadd["values"]
 
 			jsonFile.seek(0)  # rewind
 			jsonFile.truncate()
+			jsonFile.seek(0)
 			json.dump(olddata, jsonFile)
 			jsonFile.truncate()
 			jsonFile.close()

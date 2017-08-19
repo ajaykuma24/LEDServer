@@ -7,8 +7,8 @@ class BrightnessForm extends React.Component {
 		super(props);
 		this.state = {
 			value: {val: "", err: false},
-			transition: {val: "", err: false},
-			wait: {val: "", err: false},
+			transition: {val: "0", err: false},
+			wait: {val: "0", err: false},
 			values: [],
 			error1: "",
 			edit: false,
