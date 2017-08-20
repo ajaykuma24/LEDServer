@@ -23,6 +23,8 @@ delta = 20
 
 airplay = False
 
+os.environ['SYNCHRONIZED_LIGHTS_HOME'] = '/home/pi/lightshowpi'
+
 wdstop = {'reps': '1', 'inf': False, 'data': [{'w': '0', 't': '0', 'value': '0'}]}
 coldstop = {'reps': '1', 'inf': False, 'data': [{'w': '0', 'r': 0, 'b': 0, 't': '0', 'g': 0}]}
 
@@ -254,6 +256,8 @@ def switch():
 			print('stopped')
 			airplay=True
 			proc = pexpect.spawn("sudo python /home/pi/lightshowpi/py/synchronized_lights.py")
+			proc.expect('Running')
+			print(proc.readline(size=-1))
 		else:
 			if(not(proc is None)):
 				airplay = False
