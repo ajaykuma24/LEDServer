@@ -67,8 +67,6 @@ class Submit extends React.Component {
 							return res.text();
 						})
 						.then(function(data) {
-							console.log('sent')
-							console.log(data)
 						})
 	}
 

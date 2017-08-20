@@ -13,7 +13,8 @@ class BrightnessForm extends React.Component {
 			error1: "",
 			edit: false,
 			saveName: "",
-			saved: []
+			saved: [],
+			airplay: false
 		}
 		this.updateSaved = this.updateSaved.bind(this);
 		this.handleVal = this.handleVal.bind(this);
@@ -35,6 +36,13 @@ class BrightnessForm extends React.Component {
 							return res.json();
 						})
 						.then( (data) => {if(!data.msg) this.setState({saved: data.values})})
+		fetch("/switch", {
+							method: 'GET'
+						})
+						.then(function(res) {
+							return res.json();
+						})
+						.then( (data) => { this.setState({airplay: data.data})})
 
 	}
 	componentWillUnmount() {
@@ -55,8 +63,6 @@ class BrightnessForm extends React.Component {
 							return res.text();
 						})
 						.then(function(data) {
-							console.log('sent')
-							console.log(data)
 						})
 
 	}
@@ -250,41 +256,47 @@ class BrightnessForm extends React.Component {
 						{return <div className="button saved" key={index} onClick={this.handleValLoad.bind(this, index)} onContextMenu={this.handleValDel.bind(this, index)}> 
 							<p className="buttonText">{val.name}</p>
 						</div>})) : null
-		return (
-			<div id="form">
-				<h1>Enter a Value:</h1>
-				<NumInputs label="" divclass="add" value={this.state.value} change={this.handleVal} min={0} max={255} />
-				<input id="slider" type="range" list="steps" name="val" min="0" max="255" defaultValue={0}  step="1" onChange={this.handleSlider} />
-				<datalist id="steps">
-				    <option value="0" />
-				    <option value="25" />
-				    <option value="50" />
-				    <option value="75" />
-				    <option value="100" />
-				    <option value="125" />
-				    <option value="150" />
-				    <option value="175" />
-				    <option value="200" />
-				    <option value="225" />
-				    <option value="250" />
-				</datalist> 
-					<div className="inputs">
-						<NumInputs label="Transition Time (ms):" divclass="add" value={this.state.transition} change={this.handleTransition} min={0} />
-						<NumInputs label="Wait Time (ms):" divclass="add" value={this.state.wait} change={this.handleWait} min={0} />
-						{changingButton}
-					</div>	
-					{error1}
-					<div id="tosend">
-					{valinfos}
-					</div>
-					<input type="text" className="text" id="saveName" value={this.state.saveName} onChange={this.handlesaveName} />
-					<div className="button" id="patternSave" onClick={this.handleValSave}>
-						<p className="buttonText">Save</p>
-					</div>
-					<Submit url="bright" toSubmit={this.state.values} />
-					{saved}
-			</div>
-		);
+		if(this.state.airplay) {
+			return (<h4>Changing brightness will not work while Airplay is enabled</h4>)
+		}
+		else {
+			return (
+
+				<div id="form">
+					<h1>Enter a Value:</h1>
+					<NumInputs label="" divclass="add" value={this.state.value} change={this.handleVal} min={0} max={255} />
+					<input id="slider" type="range" list="steps" name="val" min="0" max="255" defaultValue={0}  step="1" onChange={this.handleSlider} />
+					<datalist id="steps">
+					    <option value="0" />
+					    <option value="25" />
+					    <option value="50" />
+					    <option value="75" />
+					    <option value="100" />
+					    <option value="125" />
+					    <option value="150" />
+					    <option value="175" />
+					    <option value="200" />
+					    <option value="225" />
+					    <option value="250" />
+					</datalist> 
+						<div className="inputs">
+							<NumInputs label="Transition Time (ms):" divclass="add" value={this.state.transition} change={this.handleTransition} min={0} />
+							<NumInputs label="Wait Time (ms):" divclass="add" value={this.state.wait} change={this.handleWait} min={0} />
+							{changingButton}
+						</div>	
+						{error1}
+						<div id="tosend">
+						{valinfos}
+						</div>
+						<input type="text" className="text" id="saveName" value={this.state.saveName} onChange={this.handlesaveName} />
+						<div className="button" id="patternSave" onClick={this.handleValSave}>
+							<p className="buttonText">Save</p>
+						</div>
+						<Submit url="bright" toSubmit={this.state.values} />
+						{saved}
+				</div>
+			);
+		}
 	}
 }
 

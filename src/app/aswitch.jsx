@@ -12,14 +12,10 @@ class ASwitch extends React.Component {
 							method: 'GET'
 						})
 						.then(function(res) {
-							console.log(res)
-							return res.blob();
+							return res.json();
 						})
-						.then( (data) => {console.log(data); this.setState({status: false})})
+						.then( (data) => { this.setState({status: data.data})})
 
-	}
-	shouldComponentUpdate(nextProps, nextState) {
-		return !nextState.status === this.state.status;
 	}
 	handleSwitch() {
 		if(!this.state.locked) {
@@ -37,13 +33,11 @@ class ASwitch extends React.Component {
 								return res.text();
 							})
 							.then(function(data) {
-								console.log('sent')
-								console.log(data)
 							})
 			this.setState({status: !this.state.status})
 			if(!this.state.status) {
 				this.state.locked = true;
-				setTimeout(()=>this.setState({locked: false}), 5000);
+				setTimeout(()=>this.setState({locked: false}), 10000);
 			}
 		}
 	}
@@ -51,10 +45,10 @@ class ASwitch extends React.Component {
 	render() {
 		const locked = this.state.locked ? <p>Switch is locked, please wait</p> : null
 		return (
-			<div>
+			<div id="switch-container">
 				{locked}
 				<label className="switch">
-					<input type="checkbox" checked={this.state.status} onChange={this.handleSwitch}/>
+					<input type="checkbox" checked={this.state.status} onChange={this.handleSwitch} disabled={this.state.locked}/>
 					<span className="slider round"></span>
 				</label>
 			</div>

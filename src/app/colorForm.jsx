@@ -18,7 +18,8 @@ class ColorForm extends React.Component {
 			error1: "",
 			edit: false,
 			saveName: "",
-			saved: []
+			saved: [],
+			airplay: false
 		}
 		this.updateSaved = this.updateSaved.bind(this);
 		this.handleColor = this.handleColor.bind(this);
@@ -41,6 +42,13 @@ class ColorForm extends React.Component {
 							return res.json();
 						})
 						.then( (data) => {if(!data.msg) this.setState({saved: data.colors})})
+		fetch("/switch", {
+							method: 'GET'
+						})
+						.then(function(res) {
+							return res.json();
+						})
+						.then( (data) => { this.setState({airplay: data.data})})
 
 	}
 	componentWillUnmount() {
@@ -61,8 +69,6 @@ class ColorForm extends React.Component {
 							return res.text();
 						})
 						.then(function(data) {
-							console.log('sent')
-							console.log(data)
 						})
 	}
 	handleColor(color, event) {
@@ -204,8 +210,6 @@ class ColorForm extends React.Component {
 		this.setState({colors: this.state.saved[index].colors})
 		
 	}
-
-
 	render() {
 		const colinfos = this.state.colors.map( (col, index) => 
 						{return <ColorInfo key={index} r={col.r} g={col.g} b={col.b} t={col.t} w={col.w} index={index} clickHandle={this.handleEdit} del={this.handleDel}/> })
@@ -220,27 +224,32 @@ class ColorForm extends React.Component {
 						{return <div className="button saved" key={index} onClick={this.handleColLoad.bind(this, index)} onContextMenu={this.handleColDel.bind(this, index)}> 
 							<p className="buttonText">{col.name}</p>
 						</div>})) : null
-		return (
-			<div id="form">
-				<h1>Select a Color:</h1>
-					<SketchPicker color={ this.state.color} onChange={ this.handleColor} width="30vw" disableAlpha={true}/>
-					<div className="inputs">
-						<NumInputs label="Transition Time (ms):" divclass="add" value={this.state.transition} change={this.handleTransition} min={0} />
-						<NumInputs label="Wait Time (ms):" divclass="add" value={this.state.wait} change={this.handleWait} min={0} />
-						{changingButton}
-					</div>	
-					{error1}
-					<div id="tosend">
-						{colinfos}
-					</div>
-					<input type="text" className="text" id="saveName" value={this.state.saveName} onChange={this.handlesaveName} />
-					<div className="button" id="patternSave" onClick={this.handleColSave}>
-						<p className="buttonText">Save</p>
-					</div>
-					<Submit url="colors" toSubmit={this.state.colors} />
-					{saved}
-			</div>
-		);
+		if(this.state.airplay) {
+			return (<h4>Changing color will not work while Airplay is enabled</h4>)
+		}
+		else {
+			return (
+				<div id="form">
+					<h1>Select a Color:</h1>
+						<SketchPicker color={ this.state.color} onChange={ this.handleColor} width="30vw" disableAlpha={true}/>
+						<div className="inputs">
+							<NumInputs label="Transition Time (ms):" divclass="add" value={this.state.transition} change={this.handleTransition} min={0} />
+							<NumInputs label="Wait Time (ms):" divclass="add" value={this.state.wait} change={this.handleWait} min={0} />
+							{changingButton}
+						</div>	
+						{error1}
+						<div id="tosend">
+							{colinfos}
+						</div>
+						<input type="text" className="text" id="saveName" value={this.state.saveName} onChange={this.handlesaveName} />
+						<div className="button" id="patternSave" onClick={this.handleColSave}>
+							<p className="buttonText">Save</p>
+						</div>
+						<Submit url="colors" toSubmit={this.state.colors} />
+						{saved}
+				</div>
+			);
+		}
 	}
 }
 

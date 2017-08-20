@@ -186,16 +186,20 @@ def wcontrol(q):
 
 @app.route('/colors', methods=['POST'])
 def setcolor():
-	d=request.get_json()
-	rgbstop.set()
-	rgbq.put(d)
+	global airplay
+	if(not airplay):
+		d=request.get_json()
+		rgbstop.set()
+		rgbq.put(d)
 	return ('set!')
 
 @app.route('/bright', methods=['POST'])
 def setbright():
-	d=request.get_json()
-	wstop.set()
-	wq.put(d)
+	global airplay
+	if(not airplay):
+		d=request.get_json()
+		wstop.set()
+		wq.put(d)
 	return ('set!')
 
 @app.route('/save', methods=['POST', 'GET'])
@@ -236,10 +240,9 @@ def switch():
 	global airplay
 	if(request.method == "GET"):
 		pack = {"data": airplay}
-		return pack
+		return json.dumps(pack)
 	if(request.method == "POST"):
 		d=request.get_json()
-		print(d)
 		if(d["airplay"]):
 			rgbstop.set()
 			wstop.set()
@@ -249,13 +252,12 @@ def switch():
 		 	gpio.set_PWM_dutycycle(blue, 0)
 		 	gpio.set_PWM_dutycycle(white, 0) 
 			airplay=True
-			proc=False
-			#proc = pexpect.spawn("sudo python /home/pi/lightshowpi/py/synchronized_lights.py")
+			proc = pexpect.spawn("sudo python /home/pi/lightshowpi/py/synchronized_lights.py")
 		else:
 			if(not(proc is None)):
 				airplay = False
 				print('start')
-				#proc.sendcontrol('c')
+				proc.sendcontrol('c')
 		return('switch')
 
 
@@ -282,18 +284,6 @@ def stop():
  	gpio.set_PWM_dutycycle(green, 0) 
  	gpio.set_PWM_dutycycle(blue, 0)
  	gpio.set_PWM_dutycycle(white, 0) 
- 	gpio.stop()
- 	rgbstop.set()
-	wstop.set()
-	rgbq.put(None)
-	rgbq.put(None)
-	rgbq.put(None)
-	wq.put(None)
-	wq.put(None)
-	wq.put(None)
-	rgbthread.join()
-	wthread.join()
-	print('joined')
 	# shutdown_server()
 	return 'stopped'
 
@@ -325,4 +315,4 @@ rgbstop = threading.Event()
 wstop = threading.Event()
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', debug=False, threaded=False, port=4000)
+	app.run(host='0.0.0.0', debug=False, threaded=True, port=4000)
