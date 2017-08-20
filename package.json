@@ -4,10 +4,11 @@
   "description": "Server running on a Raspberry Pi to control an RGBW LED strip.",
   "main": "index.js",
   "scripts": {
-    "lib": "rimraf templates/dll/ && webpack --config webpack.dll.js",
-    "clean": "rimraf templates/static/",
-    "build": "rimraf templates/static/ && webpack",
-    "watch": "rimraf templates/static/ && webpack --watch"
+    "lib": "rimraf public/dll/ && webpack --config webpack.dll.js",
+    "clean": "rimraf public/static/",
+    "build": "rimraf public/static/ && webpack",
+    "watch": "rimraf public/static/ && webpack --watch",
+    "prod": "rimraf public/static/ && webpack --config webpack.prod.js"
   },
   "repository": {
     "type": "git",

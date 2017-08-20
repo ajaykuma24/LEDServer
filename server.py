@@ -5,6 +5,7 @@ import os
 import json
 import threading
 from Queue import Queue
+import pexpect
 
 gpio = pigpio.pi()
 
@@ -19,6 +20,8 @@ blue = 18
 white = 23
 
 delta = 20
+
+airplay = False
 
 gpio.set_PWM_dutycycle(red, 0)
 gpio.set_PWM_dutycycle(green, 0) 
@@ -181,16 +184,6 @@ def wcontrol(q):
 				sleep(1)
 		sleep(1)
 
-@app.route('/', methods=['GET'])
-@app.route('/rgb', methods=['GET'])
-@app.route('/w', methods=['GET'])
-def index():
-	return send_from_directory(app.static_folder, 'index.html')
-
-@app.route('/<path:filename>')
-def send_asset(filename):
-	return send_from_directory(app.static_folder, filename)
-
 @app.route('/colors', methods=['POST'])
 def setcolor():
 	d=request.get_json()
@@ -237,6 +230,35 @@ def update():
 			return('set!')
 	return ('set!')
 
+@app.route('/switch', methods=['POST', 'GET'])
+def switch():
+	global proc
+	global airplay
+	if(request.method == "GET"):
+		pack = {"data": airplay}
+		return pack
+	if(request.method == "POST"):
+		d=request.get_json()
+		print(d)
+		if(d["airplay"]):
+			rgbstop.set()
+			wstop.set()
+			print('stopped')
+			gpio.set_PWM_dutycycle(red, 0)
+		 	gpio.set_PWM_dutycycle(green, 0) 
+		 	gpio.set_PWM_dutycycle(blue, 0)
+		 	gpio.set_PWM_dutycycle(white, 0) 
+			airplay=True
+			proc=False
+			#proc = pexpect.spawn("sudo python /home/pi/lightshowpi/py/synchronized_lights.py")
+		else:
+			if(not(proc is None)):
+				airplay = False
+				print('start')
+				#proc.sendcontrol('c')
+		return('switch')
+
+
 def shutdown_server():
 	func = request.environ.get('werkzeug.server.shutdown')
 	if func is None:
@@ -261,9 +283,38 @@ def stop():
  	gpio.set_PWM_dutycycle(blue, 0)
  	gpio.set_PWM_dutycycle(white, 0) 
  	gpio.stop()
-	shutdown_server()
+ 	rgbstop.set()
+	wstop.set()
+	rgbq.put(None)
+	rgbq.put(None)
+	rgbq.put(None)
+	wq.put(None)
+	wq.put(None)
+	wq.put(None)
+	rgbthread.join()
+	wthread.join()
+	print('joined')
+	# shutdown_server()
 	return 'stopped'
 
+@app.route('/dll/<path:filename>')
+def send_dll(filename):
+	return send_from_directory(app.static_folder, 'dll/'+filename)
+@app.route('/static/<path:filename>')
+def send_static(filename):
+	return send_from_directory(app.static_folder, 'static/'+filename)
+@app.route('/favicon.ico')
+def favicon():
+	return ''
+@app.route('/',  methods=["GET"])
+def index():
+	return send_from_directory(app.static_folder, 'index.html')
+@app.route('/<path:path>',  methods=["GET"])
+def catchall(path):
+	return send_from_directory(app.static_folder, 'index.html')
+
+
+proc=None
 rgbq = Queue()
 wq = Queue()
 rgbthread = threading.Thread(target=colcontrol, args=(rgbq,))
@@ -274,4 +325,4 @@ rgbstop = threading.Event()
 wstop = threading.Event()
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', debug=True, threaded=True, port=80)
+	app.run(host='0.0.0.0', debug=False, threaded=False, port=4000)
