@@ -23,6 +23,9 @@ delta = 20
 
 airplay = False
 
+wdstop = {'reps': '1', 'inf': False, 'data': [{'w': '0', 't': '0', 'value': '0'}]}
+coldstop = {'reps': '1', 'inf': False, 'data': [{'w': '0', 'r': 0, 'b': 0, 't': '0', 'g': 0}]}
+
 gpio.set_PWM_dutycycle(red, 0)
 gpio.set_PWM_dutycycle(green, 0) 
 gpio.set_PWM_dutycycle(blue, 0)
@@ -245,12 +248,10 @@ def switch():
 		d=request.get_json()
 		if(d["airplay"]):
 			rgbstop.set()
+			rgbq.put(coldstop)
 			wstop.set()
+			wq.put(wdstop)
 			print('stopped')
-			gpio.set_PWM_dutycycle(red, 0)
-		 	gpio.set_PWM_dutycycle(green, 0) 
-		 	gpio.set_PWM_dutycycle(blue, 0)
-		 	gpio.set_PWM_dutycycle(white, 0) 
 			airplay=True
 			proc = pexpect.spawn("sudo python /home/pi/lightshowpi/py/synchronized_lights.py")
 		else:
@@ -259,7 +260,6 @@ def switch():
 				print('start')
 				proc.sendcontrol('c')
 		return('switch')
-
 
 def shutdown_server():
 	func = request.environ.get('werkzeug.server.shutdown')
@@ -284,6 +284,8 @@ def stop():
  	gpio.set_PWM_dutycycle(green, 0) 
  	gpio.set_PWM_dutycycle(blue, 0)
  	gpio.set_PWM_dutycycle(white, 0) 
+ 	if(not(proc is None)):
+	 	proc.sendcontrol('c')
 	# shutdown_server()
 	return 'stopped'
 
