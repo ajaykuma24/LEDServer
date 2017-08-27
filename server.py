@@ -6,6 +6,7 @@ import json
 import threading
 from Queue import Queue
 import pexpect
+import random
 
 gpio = pigpio.pi()
 
@@ -46,6 +47,31 @@ def clip(x, lo, hi):
 
 def sleep(s=1000):
 	time.sleep(s/1000.0)
+
+def randhsl():
+	h = random.randint(0, 359)
+	s = random.uniform(0, 1.0)
+	l = random.uniform(0, 1.0)
+	return (h, s, l)
+
+def hsltorgb(h=0, s=0.0, l=0.0):
+	C = (1.0-abs(2.0*l-1.0))*s
+	X = C * (1.0-abs((h/60.0) % 2 - 1.0))
+	m = l-C/2.0
+	(r, g, b) = (0, 0, 0)
+	if(h >= 0 and h < 60):
+		(r, g, b) = (C, X, 0)
+	elif(h >= 60 and h < 120):
+		(r, g, b) = (X, C, 0)
+	elif(h >= 120 and h < 180):
+		(r, g, b) = (0, C, X)
+	elif(h >= 180 and h < 240):
+		(r, g, b) = (0, C, X)
+	elif(h >= 240 and h < 300):
+		(r, g, b) = (X, 0, C)
+	elif(h >= 300 and h < 360):
+		(r, g, b) = (C, 0, X)
+	return ((r+m)*255, (g+m)*255, (b+m)*255)
 
 def setcols(cols, R=0, G=0, B=0):
 	R = clip(R, 0.0, 255.0)

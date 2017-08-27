@@ -221,7 +221,6 @@ class BrightnessForm extends React.Component {
 		var saved = this.state.saved
 		saved.push({values: JSON.parse(JSON.stringify(this.state.values)), name: this.state.saveName})
 		this.setState({saved: saved})
-		this.updateSaved();
 	}
 	handlesaveName(event) {
 		event.preventDefault();
